@@ -1,0 +1,9 @@
+{
+  "name": "Luminote AI",
+  "short_name": "Luminote",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#090d16",
+  "description": "Your AI Study Tutor"
+}

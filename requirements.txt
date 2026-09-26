@@ -1,0 +1,5 @@
+Flask
+langchain
+langchain-community
+langchain-chroma
+pdfplumber
