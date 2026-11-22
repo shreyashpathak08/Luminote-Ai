@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luminote AI | Developer Edition</title>
+    <title>Luminote</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#09090b">
+    <script>(function(){try{var t=localStorage.getItem("luminote_theme");if(t!=="light"&&t!=="dark"){t=(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches)?"light":"dark";}document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
 
     <script>
         const isNewChat = "{{ 'true' if chat_log|length == 0 else 'false' }}" === "true";
@@ -21,7 +22,6 @@
             document.documentElement.classList.add('sidebar-closed');
         }
     </script>
-
     <style>
         /* 1. BASE SYSTEM */
         body { margin: 0; padding: 0; display: flex; height: 100vh; width: 100vw; background: #000000; color: #ececec; font-family: 'Geist', -apple-system, sans-serif; overflow: hidden; opacity: 0; transition: opacity 0.4s ease; letter-spacing: -0.01em; }
@@ -272,32 +272,550 @@
         .btn-danger:hover { background: #ef4444; }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+
+        /* =================================================================== */
+        /* ===== LUMINOTE UPGRADE LAYER (additive, keep BELOW everything) ===== */
+        /* =================================================================== */
+        :root {
+            --lm-amber: #fbbf24;
+            --lm-amber-deep: #f59e0b;
+            --lm-indigo: #6366f1;
+            --lm-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --lm-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --lm-hairline: rgba(255, 255, 255, 0.08);
+        }
+
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+        ::selection { background: rgba(251, 191, 36, 0.35); color: #fff; }
+
+        /* scrollbars */
+        * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; }
+        ::-webkit-scrollbar-thumb { transition: background 0.2s; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(251, 191, 36, 0.5); }
+
+        /* focus rings */
+        button:focus-visible, a:focus-visible, select:focus-visible, .session-link:focus-visible {
+            outline: 2px solid var(--lm-amber); outline-offset: 3px; border-radius: 10px;
+        }
+        textarea:focus-visible { outline: none; }
+
+        /* press feedback */
+        button, .session-link, .action-chip, .utility-btn { -webkit-tap-highlight-color: transparent; }
+        button:active, .action-chip:active, .utility-btn:active, .new-chat-btn:active {
+            transform: scale(0.96) !important; transition-duration: 0.08s !important;
+        }
+
+        /* ambient background */
+        .main::before {
+            -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 25%, transparent 78%);
+            mask-image: radial-gradient(ellipse at 50% 40%, #000 25%, transparent 78%);
+        }
+        .main::after {
+            content: ''; position: absolute; inset: -20%; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(circle at 20% 25%, rgba(99, 102, 241, 0.10), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(251, 191, 36, 0.08), transparent 42%),
+                radial-gradient(circle at 60% 10%, rgba(244, 114, 182, 0.05), transparent 35%);
+            filter: blur(40px);
+            animation: lmAurora 24s ease-in-out infinite alternate;
+        }
+        @keyframes lmAurora {
+            0%   { transform: translate3d(-3%, -2%, 0) scale(1); }
+            50%  { transform: translate3d(3%, 2%, 0) scale(1.08); }
+            100% { transform: translate3d(-2%, 3%, 0) scale(1.03); }
+        }
+        body::after {
+            content: ''; position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.035; mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+        }
+
+        /* sidebar */
+        .sidebar { background: linear-gradient(180deg, #070707 0%, #030303 100%); position: relative; }
+        .sidebar::after {
+            content: ''; position: absolute; top: 0; right: 0; width: 1px; height: 100%; pointer-events: none;
+            background: linear-gradient(180deg, transparent, rgba(251,191,36,0.25) 30%, rgba(99,102,241,0.2) 70%, transparent);
+            opacity: 0.6;
+        }
+        .brand-logo .ai-spark { animation: lmSparkPulse 3.5s ease-in-out infinite; }
+        @keyframes lmSparkPulse {
+            0%, 100% { text-shadow: 0 0 15px rgba(251,191,36,0.5); transform: scale(1) rotate(0deg); }
+            50%      { text-shadow: 0 0 28px rgba(251,191,36,0.95); transform: scale(1.08) rotate(6deg); }
+        }
+        .session-item-container { animation: lmSlideInLeft 0.5s var(--lm-ease-out) both; }
+        .session-item-container:nth-child(1) { animation-delay: 0.05s; }
+        .session-item-container:nth-child(2) { animation-delay: 0.10s; }
+        .session-item-container:nth-child(3) { animation-delay: 0.15s; }
+        .session-item-container:nth-child(4) { animation-delay: 0.20s; }
+        .session-item-container:nth-child(5) { animation-delay: 0.25s; }
+        .session-item-container:nth-child(6) { animation-delay: 0.30s; }
+        .session-item-container:nth-child(7) { animation-delay: 0.35s; }
+        .session-item-container:nth-child(n+8) { animation-delay: 0.40s; }
+        @keyframes lmSlideInLeft { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: translateX(0); } }
+
+        .session-link { position: relative; transition: all 0.25s var(--lm-ease-out); }
+        .session-link:hover { transform: translateX(3px); }
+        .session-link.active { background: linear-gradient(90deg, rgba(251,191,36,0.14), rgba(251,191,36,0.04)); }
+        .new-chat-btn { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
+        .new-chat-btn:hover { box-shadow: inset 0 1px 0 rgba(251,191,36,0.3), 0 8px 24px rgba(251,191,36,0.18); }
+        .settings-btn { transition: all 0.25s var(--lm-ease-out); }
+        .settings-btn:hover { transform: translateX(3px); }
+
+        /* top bar */
+        .utility-btn { transition: all 0.25s var(--lm-ease-out); box-shadow: 0 4px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05); }
+        .utility-btn:hover { box-shadow: 0 8px 22px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1); }
+        .utility-btn.active { animation: lmActiveGlow 3s ease-in-out infinite; }
+        @keyframes lmActiveGlow {
+            0%, 100% { box-shadow: 0 0 18px rgba(251,191,36,0.35); }
+            50%      { box-shadow: 0 0 30px rgba(251,191,36,0.6); }
+        }
+        .pdf-panel { box-shadow: 20px 0 60px rgba(0,0,0,0.6), inset -1px 0 0 rgba(251,191,36,0.06); animation: lmPanelIn 0.6s var(--lm-ease-out) both; }
+        @keyframes lmPanelIn { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* hero */
+        .hero-logo::before {
+            content: ''; position: absolute; width: 220px; height: 220px; border-radius: 50%; z-index: -1; pointer-events: none;
+            border: 1px solid rgba(251,191,36,0.15); box-shadow: 0 0 60px rgba(251,191,36,0.08) inset;
+            animation: lmRing 4s ease-out infinite;
+        }
+        .hero-logo::after {
+            content: ''; position: absolute; width: 220px; height: 220px; border-radius: 50%; z-index: -1; pointer-events: none;
+            border: 1px solid rgba(99,102,241,0.18); animation: lmRing 4s ease-out 2s infinite;
+        }
+        @keyframes lmRing { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
+        .hero-subtitle { animation-delay: 0.15s; }
+        .empty-input-box { animation-delay: 0.3s; }
+
+        /* input dock */
+        .input-card { transition: transform 0.35s var(--lm-ease-spring), box-shadow 0.35s var(--lm-ease-out); }
+        .input-card:focus-within {
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9), 0 0 60px rgba(251,191,36,0.12), 0 0 0 1px rgba(251,191,36,0.15) inset;
+        }
+        .input-card:focus-within::before { animation-duration: 1.6s; filter: blur(0.3px) brightness(1.15); }
+        .input-card::after { background: linear-gradient(180deg, #151515, #0e0e0e); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
+        .action-icon-btn { transition: all 0.25s var(--lm-ease-spring); }
+        .action-icon-btn:hover { transform: scale(1.15) rotate(-6deg); }
+        button[type="submit"] { transition: all 0.3s var(--lm-ease-spring); letter-spacing: -0.01em; position: relative; overflow: hidden; }
+        button[type="submit"]::after {
+            content: ''; position: absolute; top: 0; left: -120%; width: 60%; height: 100%;
+            background: linear-gradient(100deg, transparent, rgba(255,255,255,0.55), transparent);
+            transform: skewX(-20deg); transition: left 0.6s var(--lm-ease-out);
+        }
+        button[type="submit"]:hover::after { left: 140%; }
+        button[type="submit"]:hover { box-shadow: 0 8px 24px rgba(251,191,36,0.45); }
+        .attached-pill { animation: lmPillIn 0.4s var(--lm-ease-spring) both; backdrop-filter: blur(8px); }
+        @keyframes lmPillIn { from { opacity: 0; transform: scale(0.6) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        /* chat messages */
+        .message-row { animation: lmRowIn 0.55s var(--lm-ease-out) both; }
+        @keyframes lmRowIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .user-bubble {
+            animation: lmBubbleIn 0.45s var(--lm-ease-spring) both;
+            background: linear-gradient(135deg, rgba(251,191,36,0.14), rgba(251,191,36,0.05));
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+            transform-origin: bottom right;
+        }
+        @keyframes lmBubbleIn { from { opacity: 0; transform: scale(0.92) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .ai-bubble { position: relative; }
+        .message-row.latest-message .ai-bubble { animation: lmAiIn 0.6s var(--lm-ease-out) 0.08s forwards; }
+        @keyframes lmAiIn { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+
+        /* markdown inside AI replies */
+        .ai-bubble p { margin: 0 0 0.9em; }
+        .ai-bubble strong { color: #fff; font-weight: 650; }
+        .ai-bubble a { color: var(--lm-amber); text-decoration: none; background: linear-gradient(var(--lm-amber), var(--lm-amber)) 0 100% / 0 1px no-repeat; transition: background-size 0.35s var(--lm-ease-out); }
+        .ai-bubble a:hover { background-size: 100% 1px; }
+        .ai-bubble ul, .ai-bubble ol { padding-left: 1.3em; }
+        .ai-bubble li { margin: 0.3em 0; }
+        .ai-bubble li::marker { color: var(--lm-amber); }
+        .ai-bubble h1, .ai-bubble h2, .ai-bubble h3 { letter-spacing: -0.02em; color: #fff; margin: 1.2em 0 0.5em; }
+        .ai-bubble blockquote {
+            margin: 1em 0; padding: 10px 18px; border-left: 3px solid var(--lm-amber);
+            background: linear-gradient(90deg, rgba(251,191,36,0.07), transparent); border-radius: 0 12px 12px 0; color: #cbd5e1;
+        }
+        .ai-bubble code {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.88em; padding: 2px 7px; border-radius: 6px;
+            background: rgba(251,191,36,0.1); color: #fde68a; border: 1px solid rgba(251,191,36,0.15);
+        }
+        .ai-bubble pre {
+            background: #08080a; border: 1px solid var(--lm-hairline); border-radius: 14px; padding: 16px 18px; overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04); margin: 1em 0;
+        }
+        .ai-bubble pre code { background: none; border: none; padding: 0; color: #e2e8f0; }
+        .ai-bubble table { border-collapse: separate; border-spacing: 0; width: 100%; margin: 1em 0; border: 1px solid var(--lm-hairline); border-radius: 12px; overflow: hidden; }
+        .ai-bubble th { background: rgba(251,191,36,0.08); color: #fff; text-align: left; font-weight: 600; }
+        .ai-bubble th, .ai-bubble td { padding: 10px 14px; border-bottom: 1px solid var(--lm-hairline); }
+        .ai-bubble tr:last-child td { border-bottom: none; }
+        .ai-bubble tbody tr { transition: background 0.2s; }
+        .ai-bubble tbody tr:hover { background: rgba(255,255,255,0.03); }
+        .ai-bubble hr { border: none; height: 1px; background: linear-gradient(90deg, transparent, rgba(251,191,36,0.4), transparent); margin: 1.5em 0; }
+
+        .response-actions { opacity: 0.55; transform: translateY(2px); transition: all 0.3s var(--lm-ease-out); }
+        .message-row:hover .response-actions, .message-row.latest-message .response-actions { opacity: 1; transform: translateY(0); }
+        .action-chip { transition: all 0.25s var(--lm-ease-spring); }
+        .action-chip:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(251,191,36,0.15); }
+        .pinned-input-bar { background: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0.85) 65%, transparent); }
+        .spinner { box-shadow: 0 0 14px rgba(251,191,36,0.35); }
+
+        /* modals */
+        .modal-overlay { animation: fadeIn 0.25s ease both; }
+        .modal-content {
+            animation: lmModalIn 0.45s var(--lm-ease-spring) both;
+            background: linear-gradient(180deg, #0f0f12, #09090b);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.04), 0 0 80px rgba(251,191,36,0.05);
+        }
+        @keyframes lmModalIn { from { opacity: 0; transform: translateY(24px) scale(0.94); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .close-btn { transition: all 0.3s var(--lm-ease-spring); }
+        .settings-select, .settings-textarea { transition: all 0.25s var(--lm-ease-out); }
+        .settings-select:hover, .settings-textarea:hover { border-color: rgba(255,255,255,0.3); }
+        .settings-select:focus, .settings-textarea:focus { box-shadow: 0 0 0 3px rgba(251,191,36,0.15), 0 0 24px rgba(251,191,36,0.08); background: #14141a; }
+        .save-settings-btn, .btn-cancel, .btn-danger { transition: all 0.25s var(--lm-ease-spring); }
+        .save-settings-btn:hover { box-shadow: 0 8px 24px rgba(251,191,36,0.35); }
+        .btn-danger:hover { box-shadow: 0 8px 24px rgba(239,68,68,0.4); transform: translateY(-1px); }
+
+        /* performance */
+        .main::after, .empty-state-wrapper::after, .chat-watermark { will-change: transform; }
+        .user-bubble, .ai-bubble, .message-row { contain: layout style; }
+
+        /* mobile */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.6rem; }
+            .hero-subtitle { font-size: 1rem; margin-bottom: 32px; }
+            .chat-display { padding: 90px 14px 170px 14px; }
+            .user-bubble { max-width: 90%; }
+            .pdf-panel { width: 100%; }
+            .main::after { display: none; }
+        }
+
+        /* reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* ===== CITATION CHIPS ===== */
+        .cite-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; margin: 0 2px; vertical-align: 0.3em; font-size: 0.65rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; line-height: 1; color: #fbbf24; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); border-radius: 6px; cursor: pointer; transition: all 0.2s var(--lm-ease-spring); }
+        .cite-chip:hover { background: #fbbf24; color: #000; transform: translateY(-1px) scale(1.12); box-shadow: 0 4px 12px rgba(251,191,36,0.35); }
+        .source-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .source-chip { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #a1a1aa; padding: 5px 12px; border-radius: 12px; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; cursor: pointer; transition: all 0.2s var(--lm-ease-spring); }
+        .source-chip:hover { background: rgba(251,191,36,0.1); color: #fbbf24; border-color: rgba(251,191,36,0.4); transform: translateY(-2px); }
+        .source-chip[data-kind="youtube"], .source-chip[data-kind="youtube"]:hover { cursor: default; }
+
+        /* ---- failure bubble (additive) ---- */
+        .ai-bubble.lm-error { display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:14px 16px; border-radius:14px; border:1px solid rgba(248,113,113,.35); background:rgba(248,113,113,.08); color:#fecaca; font-size:.98rem; }
+        .ai-bubble.lm-error .lm-error-text { flex:1 1 240px; }
+        .ai-bubble.lm-error .lm-retry-btn { cursor:pointer; border:1px solid rgba(251,191,36,.45); background:rgba(251,191,36,.12); color:#fde68a; padding:7px 14px; border-radius:999px; font:inherit; font-size:.9rem; transition:background .2s, transform .2s; }
+        .ai-bubble.lm-error .lm-retry-btn:hover { background:rgba(251,191,36,.22); transform:translateY(-1px); }
+    
+        /* ---- referred pages line + roomier chat (additive) ---- */
+        .ref-line { display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; margin:12px 0 6px; font-size:.78rem; font-family:'JetBrains Mono',monospace; }
+        .ref-label { color:#71717a; letter-spacing:.02em; margin-right:2px; }
+        .ref-src { color:#a1a1aa; margin-left:4px; }
+        .ref-page { cursor:pointer; background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.25); color:#fbbf24; padding:2px 10px; border-radius:999px; font:inherit; font-size:.76rem; transition:background .2s, color .2s, transform .2s; }
+        .ref-page:hover { background:#fbbf24; color:#000; transform:translateY(-1px); }
+        .chat-display { max-width: min(1120px, 94%); }
+        .pinned-input-bar form { max-width: min(1040px, 94%); }
+    
+        /* =====================================================================
+           LUMINOTE v3 · light + dark themes (data-theme on <html>)
+           Layered on top of the original rules. Delete this block to go back.
+           ===================================================================== */
+        :root, html[data-theme="dark"] {
+            --bg: #09090b; --side: rgba(255,255,255,.03); --surface: rgba(255,255,255,.055); --solid: #131316; --raised: rgba(255,255,255,.08);
+            --line: rgba(255,255,255,.10); --line-soft: rgba(255,255,255,.06);
+            --text: #f1efe6; --text2: #dcd9cc; --strong: #ffffff; --muted: #9a978a; --faint: #6f6c62;
+            --accent: #fbbf24; --accent-ink: #1a1200; --accent-soft: rgba(251,191,36,.14); --mark: #fbbf24;
+            --ub: rgba(251,191,36,.10); --beam: #fbbf24; --beam2: #ffffff;
+            --send: linear-gradient(135deg, #fde68a, #fbbf24); --send-ink: #1a1200;
+            --heading: linear-gradient(180deg, #ffffff 35%, #f6dc8a);
+            --blobs: radial-gradient(circle 440px at 14% 14%, rgba(251,191,36,.26), transparent 70%), radial-gradient(circle 480px at 88% 84%, rgba(245,158,11,.17), transparent 70%), radial-gradient(circle 300px at 70% 4%, rgba(253,230,138,.08), transparent 70%);
+            --shadow: 0 30px 70px rgba(0,0,0,.6); --scroll: rgba(255,255,255,.14);
+            --ring: rgba(251,191,36,.22); --ring2: rgba(251,191,36,.12);
+            color-scheme: dark;
+        }
+        html[data-theme="light"] {
+            --bg: #f4f5f9; --side: rgba(255,255,255,.72); --surface: rgba(255,255,255,.86); --solid: #ffffff; --raised: #eceef5;
+            --line: #e0e2ee; --line-soft: #ebedf5;
+            --text: #12141f; --text2: #2a2d3d; --strong: #0b0d16; --muted: #686d82; --faint: #9a9fb3;
+            --accent: #12141f; --accent-ink: #ffffff; --accent-soft: #fff1a8; --mark: #12141f;
+            --ub: #fff4b8; --beam: #ffb800; --beam2: #12141f;
+            --send: #12141f; --send-ink: #ffffff;
+            --heading: linear-gradient(#12141f, #12141f);
+            --blobs: radial-gradient(circle 460px at 14% 12%, rgba(255,216,77,.48), transparent 70%), radial-gradient(circle 480px at 88% 84%, rgba(255,196,0,.26), transparent 70%), radial-gradient(circle 300px at 70% 4%, rgba(255,236,150,.4), transparent 70%);
+            --shadow: 0 24px 60px rgba(40,44,80,.14); --scroll: rgba(18,20,31,.18);
+            --ring: rgba(18,20,31,.14); --ring2: rgba(18,20,31,.07);
+            color-scheme: light;
+        }
+        html, body { background: var(--bg); }
+        body { color: var(--text); font-family: 'Plus Jakarta Sans', 'Geist', -apple-system, 'Segoe UI', sans-serif; letter-spacing: -0.005em; }
+        .brand-logo, .hero-title, .md-h1, .md-h2, .modal-title { font-family: 'Bricolage Grotesque', 'Plus Jakarta Sans', sans-serif; }
+        ::selection { background: rgba(255,200,40,.4); color: inherit; }
+        ::-webkit-scrollbar-thumb { background: var(--scroll); }
+        .ic { width: 1.15em; height: 1.15em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; display: inline-block; vertical-align: -0.2em; }
+        .lm-mark { width: 1em; height: 1em; display: block; fill: currentColor; }
+        .ai-spark { display: inline-flex; line-height: 1; }
+
+        /* ambient light instead of grain, grid and aurora */
+        .main { background: var(--bg); }
+        .main::before { content: ''; position: absolute; inset: 0; background: var(--blobs); background-color: transparent; -webkit-mask-image: none; mask-image: none; opacity: 1; pointer-events: none; z-index: 0; animation: none; }
+        .main::after, body::after, .empty-state-wrapper::after, .active-chat-wrapper::before, .sidebar::after, .new-chat-btn::after, button[type="submit"]::after { display: none !important; }
+
+        /* ---------- header strip (nothing floats over the PDF) ---------- */
+        .top-bar { top: 0; left: 0; right: 0; height: 60px; padding: 0 20px; gap: 6px; overflow-x: auto; scrollbar-width: none; align-items: center; }
+        .top-bar::-webkit-scrollbar { display: none; }
+        .workspace { padding-top: 60px; }
+        .brand-logo-toggle { color: var(--mark); text-shadow: none; padding: 6px; margin-right: 8px; border-radius: 12px; display: flex; font-size: 1.7rem; background: transparent; }
+        .brand-logo-toggle:hover { transform: none; filter: none; background: var(--raised); }
+        .brand-logo-toggle .ai-spark { color: var(--mark) !important; text-shadow: none; }
+        .utility-btn { background: transparent; border: 1px solid transparent; color: var(--muted); border-radius: 12px; padding: 8px 14px; gap: 8px; font-size: .88rem; font-weight: 600; box-shadow: none; white-space: nowrap; align-items: center; font-family: inherit; }
+        .utility-btn:hover { color: var(--text); background: var(--raised); transform: none; box-shadow: none; border-color: transparent; }
+        .utility-btn.active { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); animation: none; box-shadow: none; }
+        .theme-toggle { margin-left: auto; flex: none; width: 38px; height: 38px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; display: grid; place-items: center; transition: color .2s, border-color .2s, transform .35s; }
+        .theme-toggle:hover { color: var(--text); border-color: var(--muted); transform: rotate(18deg); }
+        .theme-toggle .ic { width: 19px; height: 19px; grid-area: 1/1; }
+        html[data-theme="dark"] .tg-sun, html[data-theme="light"] .tg-moon { display: none; }
+        .pdf-panel { background: var(--solid); border-right: 1px solid var(--line); box-shadow: none; padding: 0; }
+        #pdf-frame { display: block; width: 100%; height: 100%; border: 0 !important; border-radius: 0 !important; background: #fff; }
+
+        /* ---------- sidebar ---------- */
+        .sidebar { background: var(--side); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-right: 1px solid var(--line); box-shadow: none; position: relative; overflow: hidden; }
+        .sidebar::before { content: ''; position: absolute; top: -120px; left: -80px; width: 340px; height: 300px; background: radial-gradient(circle, var(--accent-soft), transparent 70%); pointer-events: none; z-index: 0; }
+        .sidebar-content { position: relative; z-index: 1; padding: 22px 14px 14px; }
+        .logo-link { margin-bottom: 20px; padding: 0 4px; }
+        .brand-logo { gap: 12px; font-size: 1.45rem; font-weight: 700; letter-spacing: -0.03em; color: var(--text); }
+        .brand-tile { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; background: var(--accent-soft); border: 1px solid var(--line); box-shadow: 0 8px 24px rgba(251,191,36,.18); }
+        .brand-tile .ai-spark { font-size: 1.55rem; color: var(--mark); text-shadow: none; animation: none; filter: drop-shadow(0 0 8px rgba(251,191,36,.55)); }
+        .new-chat-btn { background: var(--send); color: var(--send-ink); border: 0; border-radius: 14px; padding: 13px 16px; font-weight: 700; font-size: .95rem; box-shadow: 0 10px 28px rgba(251,191,36,.22); margin-bottom: 22px; font-family: inherit; transition: transform .2s, box-shadow .2s, filter .2s; }
+        html[data-theme="light"] .new-chat-btn { box-shadow: 0 10px 24px rgba(18,20,31,.2); }
+        .new-chat-btn:hover { background: var(--send); color: var(--send-ink); transform: translateY(-1px); box-shadow: 0 14px 34px rgba(251,191,36,.3); filter: brightness(1.05); }
+        .side-label { font-size: .78rem; font-weight: 600; color: var(--faint); padding: 0 10px 10px; letter-spacing: .01em; }
+        .session-list { gap: 5px; }
+        .session-item-container { animation: none; }
+        .session-link { display: flex; align-items: center; gap: 12px; padding: 10px 40px 10px 10px; color: var(--muted); border-radius: 14px; border: 1px solid transparent; text-overflow: clip; transition: color .2s, background .2s, border-color .2s; }
+        .session-link:hover { color: var(--text); background: var(--raised); transform: none; }
+        .session-link.active { background: var(--surface); border-color: var(--line); box-shadow: 0 6px 20px rgba(0,0,0,.12), inset 3px 0 0 var(--accent); color: var(--text); font-weight: 600; }
+        html[data-theme="light"] .session-link.active { background: #fff6c8; border-color: #efdb7a; box-shadow: inset 3px 0 0 #12141f; }
+        .session-link.active::before { content: none; }
+        .sl-ic { flex: none; width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--raised); color: var(--muted); font-size: 1rem; }
+        .session-link.active .sl-ic { background: var(--accent); color: var(--accent-ink); }
+        .sl-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+        .sl-title { font-size: .92rem; font-weight: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .sl-sub { font-size: .75rem; font-weight: 500; color: var(--faint); margin-top: 2px; }
+        .direct-action-btn { color: var(--muted); font-size: 1rem; display: flex; align-items: center; }
+        .direct-action-btn .ic { width: 1.05em; height: 1.05em; }
+        .direct-action-btn:hover { color: #ef4444; background: rgba(239,68,68,.12); box-shadow: none; }
+        .sidebar-footer { position: relative; z-index: 1; background: transparent; border-top: 1px solid var(--line); padding: 12px 14px; }
+        .settings-btn { color: var(--muted); display: flex; align-items: center; gap: 10px; border-radius: 12px; font-family: inherit; font-weight: 600; }
+        .settings-btn:hover { color: var(--text); background: var(--raised); transform: none; }
+
+        /* ---------- home ---------- */
+        .hero-logo .ai-spark { font-size: 4.6rem; color: var(--mark); text-shadow: none; filter: drop-shadow(0 0 24px rgba(251,191,36,.7)) drop-shadow(0 0 60px rgba(251,191,36,.35)); }
+        @keyframes smoothFloat { 0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 22px rgba(251,191,36,.6)) drop-shadow(0 0 50px rgba(251,191,36,.3)); } 50% { transform: translateY(-12px); filter: drop-shadow(0 0 34px rgba(251,191,36,.95)) drop-shadow(0 0 80px rgba(251,191,36,.5)); } }
+        .hero-logo .ai-spark.fantasy-expand { filter: drop-shadow(0 0 50px rgba(251,191,36,1)) drop-shadow(0 0 20px #fff) !important; text-shadow: none !important; }
+        .hero-logo::before { width: 190px; height: 190px; border: 1px solid var(--ring); box-shadow: none; }
+        .hero-logo::after { width: 190px; height: 190px; border: 1px solid var(--ring2); }
+        html[data-theme="light"] .hero-logo .ai-spark { position: relative; filter: none; }
+        html[data-theme="light"] .hero-logo .ai-spark::before { content: ''; position: absolute; inset: -30px; border-radius: 50%; background: #ffd84d; box-shadow: 0 0 50px 6px rgba(255,216,77,.5); z-index: -1; }
+        html[data-theme="light"] .hero-logo .ai-spark.fantasy-expand { filter: drop-shadow(0 0 30px rgba(255,200,0,1)) !important; }
+        .hero-title { font-weight: 800; font-size: clamp(2.4rem, 5vw, 3.6rem); letter-spacing: -0.04em; line-height: 1.05; margin: 40px 0 14px; max-width: 16ch; background: var(--heading); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; text-shadow: none; }
+        .hero-subtitle { font-size: 1.08rem; line-height: 1.6; color: var(--muted); max-width: 46ch; margin: 0 auto 38px; letter-spacing: 0; }
+        .empty-input-box { max-width: 880px; width: 100%; }
+        .start-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 22px; width: 100%; }
+        .start-card { text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); color: var(--text); font-family: inherit; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: transform .25s, border-color .2s, box-shadow .25s; }
+        .start-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 16px 40px rgba(0,0,0,.14); }
+        .sc-ic { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); margin-bottom: 6px; }
+        html[data-theme="light"] .sc-ic { color: #12141f; }
+        .start-card b { font-size: .98rem; font-weight: 700; }
+        .start-card small { font-size: .82rem; color: var(--muted); line-height: 1.4; font-weight: 500; }
+
+        /* ---------- composer (keeps the circling light beam) ---------- */
+        .input-card { background: transparent; border-radius: 24px; padding: 14px 14px 12px 18px; flex-wrap: wrap; align-items: center; gap: 6px 4px; box-shadow: var(--shadow); }
+        .input-card::before { inset: -1.5px; border-radius: 25.5px; background: conic-gradient(from var(--angle), transparent 68%, var(--beam) 90%, var(--beam2) 100%); }
+        .input-card::after { inset: 0; border-radius: 24px; background: var(--solid); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+        .input-card:focus-within { transform: translateY(-2px); box-shadow: var(--shadow); }
+        .input-card textarea { order: -1; flex: 1 1 100%; margin: 0; padding: 4px 6px 8px; min-height: 48px; font-size: 1.05rem; line-height: 1.55; color: var(--text); font-family: inherit; }
+        textarea::placeholder { color: var(--faint); }
+        .action-icon-btn { width: 38px; height: 38px; padding: 0; color: var(--muted); font-size: 1.25rem; border-radius: 11px; transition: color .2s, background .2s; display: grid; place-items: center; }
+        .action-icon-btn:hover { color: var(--text); background: var(--raised); transform: none; }
+        select[name="target_source"] { appearance: none; -webkit-appearance: none; background-color: transparent; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b90a7' stroke-width='2.5' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat: no-repeat; background-position: right 10px center; border: 1px solid var(--line); border-radius: 999px; padding: 7px 30px 7px 14px; margin-left: 4px; font-family: inherit; font-size: .82rem; font-weight: 600; color: var(--text2); max-width: 200px; text-overflow: ellipsis; transition: border-color .2s; }
+        select[name="target_source"]:hover { border-color: var(--accent); }
+        select[name="target_source"] option { background: var(--solid); color: var(--text); }
+        button[type="submit"] { margin-left: auto; background: var(--send); color: var(--send-ink); border-radius: 14px; padding: 11px 24px; font-weight: 700; font-size: .95rem; letter-spacing: 0; box-shadow: none; font-family: inherit; transition: filter .2s, transform .1s; }
+        button[type="submit"]:hover { background: var(--send); filter: brightness(1.08); transform: none; box-shadow: none; }
+        button[type="submit"]:focus-visible, .utility-btn:focus-visible, .action-chip:focus-visible, .start-card:focus-visible, .theme-toggle:focus-visible, .new-chat-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .pinned-input-bar { background: linear-gradient(to top, var(--bg) 62%, transparent); padding: 30px 20px 22px; }
+        .pinned-input-bar form { max-width: min(1040px, 94%); }
+        .attachment-pill-tray { min-height: 0; margin-bottom: 8px; }
+        .attached-pill { background: var(--surface); border: 1px solid var(--line); color: var(--text2); font-family: inherit; font-weight: 600; font-size: .8rem; padding: 5px 12px; border-radius: 999px; animation: none; backdrop-filter: blur(10px); }
+        .attached-pill .ic { color: var(--accent); }
+        html[data-theme="light"] .attached-pill .ic { color: #b07d00; }
+        .pill-remove-btn { color: var(--muted); }
+        .pill-remove-btn:hover { color: var(--text); transform: none; }
+
+        /* ---------- loading ---------- */
+        .loading-container { font-family: inherit; font-size: .95rem; letter-spacing: 0; text-transform: none; font-weight: 600; background: none; -webkit-text-fill-color: currentColor; color: var(--muted); }
+        .spinner { border: 2px solid var(--accent-soft); border-top-color: var(--accent); width: 16px; height: 16px; margin-right: 10px; }
+        html[data-theme="light"] .spinner { border-top-color: #12141f; }
+
+        /* ---------- conversation ---------- */
+        .chat-display { max-width: min(1120px, 94%); padding: 34px 28px 200px; }
+        .message-row { margin-bottom: 38px; }
+        .user-bubble { background: var(--ub); border: 1px solid var(--line); box-shadow: none; color: var(--text); border-radius: 20px 20px 6px 20px; padding: 14px 20px; max-width: 72%; font-size: 1rem; line-height: 1.55; backdrop-filter: none; animation: none; font-weight: 500; }
+        .ai-bubble { font-size: 1.03rem; line-height: 1.78; color: var(--text); margin-top: 20px; }
+        .ai-bubble.lm-error { color: #fecaca; }
+        html[data-theme="light"] .ai-bubble.lm-error { color: #991b1b; background: rgba(239,68,68,.08); }
+        .ai-bubble .md-strong, .ai-bubble strong { color: var(--strong); font-weight: 700; }
+        .md-h1, .md-h2, .md-h3, .md-h4 { color: var(--text); letter-spacing: -0.02em; line-height: 1.25; }
+        .md-h1 { font-size: 1.9rem; font-weight: 800; margin: 1.4em 0 .6em; }
+        .md-h2 { font-size: 1.5rem; font-weight: 750; margin: 1.5em 0 .7em; width: fit-content; max-width: 100%; background: var(--heading); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+        html[data-theme="light"] .md-h2 { display: inline-block; -webkit-text-fill-color: #12141f; color: #12141f; background: linear-gradient(transparent 58%, #ffd84d 58%, #ffd84d 92%, transparent 92%); padding: 0 .3em; margin-left: -.3em; }
+        .md-h3 { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin: 1.4em 0 .5em; }
+        html[data-theme="light"] .md-h3 { color: #12141f; }
+        .md-h4 { font-size: 1rem; font-weight: 700; color: var(--text2); margin: 1.2em 0 .4em; }
+        .md-li { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+        .md-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); transform: translateY(-.2em); }
+        .md-hr { border: 0; border-top: 1px solid var(--line); margin: 26px 0; }
+        .md-gap { height: 12px; }
+        .ai-bubble code { font-family: 'JetBrains Mono', monospace; font-size: .9em; background: var(--raised); color: var(--text); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; }
+        .response-actions { gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+        .action-chip { background: transparent; border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 6px 14px; font-size: .84rem; gap: 7px; align-items: center; white-space: nowrap; font-family: inherit; font-weight: 600; transition: color .2s, border-color .2s, background .2s; }
+        .action-chip:hover { background: var(--accent-soft); color: var(--text); border-color: var(--accent); transform: none; }
+        .action-chip .ic { color: var(--accent); width: 1.05em; height: 1.05em; }
+        html[data-theme="light"] .action-chip .ic { color: #b07d00; }
+        .ref-line { font-family: inherit; font-size: .8rem; margin: 14px 0 8px; gap: 6px; }
+        .ref-label { color: var(--muted); display: inline-flex; align-items: center; gap: 6px; margin-right: 4px; font-weight: 600; }
+        .ref-label .ic { color: var(--accent); width: 1em; height: 1em; }
+        html[data-theme="light"] .ref-label .ic { color: #b07d00; }
+        .ref-src { color: var(--muted); }
+        .ref-page { font-family: inherit; font-weight: 700; background: transparent; border: 1px solid var(--line); color: var(--text2); padding: 2px 10px; border-radius: 8px; }
+        .ref-page:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); transform: none; }
+
+        /* ---------- modals ---------- */
+        .modal-overlay { background: rgba(6,7,12,.6); backdrop-filter: blur(6px); }
+        .modal-content { display: flex; flex-direction: column; background: var(--solid); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 30px 80px rgba(0,0,0,.45); color: var(--text); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 4px; }
+        .modal-title { font-weight: 700; letter-spacing: -0.02em; }
+        .close-btn { color: var(--muted); width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-size: 1.5rem; }
+        .close-btn:hover { color: var(--text); background: var(--raised); transform: none; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+        .form-label { font-size: .85rem; font-weight: 600; color: var(--muted); }
+        .settings-select, .settings-textarea { background: var(--raised); border: 1px solid var(--line); color: var(--text); border-radius: 12px; font-family: inherit; }
+        .settings-select, .settings-textarea { width: 100%; box-sizing: border-box; }
+        .settings-textarea { min-height: 92px; resize: vertical; }
+        .settings-select:focus, .settings-textarea:focus { border-color: var(--accent); background: var(--raised); box-shadow: 0 0 0 4px var(--accent-soft); }
+        .save-settings-btn { background: var(--send); color: var(--send-ink); font-family: inherit; font-weight: 700; }
+        .btn-cancel { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+        .btn-danger { background: #dc2626; color: #fff; }
+        .logo-picker { display: flex; gap: 10px; }
+        .logo-opt { width: 62px; height: 62px; border-radius: 16px; border: 1px solid var(--line); background: var(--raised); color: var(--muted); font-size: 2rem; display: grid; place-items: center; cursor: pointer; padding: 0; transition: border-color .2s, color .2s, background .2s; }
+        .logo-opt:hover { color: var(--text); border-color: var(--accent); }
+        .logo-opt.is-on { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 3px var(--accent-soft); }
+        html[data-theme="light"] .logo-opt.is-on { color: #12141f; }
+
+        @media (max-width: 768px) {
+            .empty-state-wrapper { justify-content: flex-start; padding: 28px 16px 40px; overflow-y: auto; }
+            .hero-logo .ai-spark { font-size: 3.6rem; }
+            .hero-logo::before, .hero-logo::after { width: 130px; height: 130px; }
+            .hero-title { margin-top: 22px; }
+            .start-cards { grid-template-columns: 1fr; }
+            .hero-title { max-width: none; }
+            .chat-display { padding: 22px 14px 190px; }
+            .user-bubble { max-width: 88%; }
+            .utility-btn { padding: 8px 10px; }
+        }
+        @media (prefers-reduced-motion: reduce) { .hero-logo .ai-spark { animation: none; } .theme-toggle { transition: none; } }
+    
+        /* ===== v4 motion: thinking logo, wallpaper, live typing ===== */
+        .hero-logo .ai-spark { scale: 1; }
+        .hero-logo .ai-spark.fantasy-expand {
+            transform: translateY(10px) !important;
+            scale: 2.2;
+            animation: lmThinkIn .9s cubic-bezier(.22,1.2,.36,1) both, lmThinkPulse 2.4s ease-in-out .9s infinite !important;
+        }
+        @keyframes lmThinkIn { from { scale: 1; } to { scale: 2.2; } }
+        @keyframes lmThinkPulse { 0%, 100% { scale: 2.2; } 50% { scale: 2.36; } }
+
+        .chat-watermark { position: absolute; top: 50%; left: 50%; width: min(460px, 72vw); aspect-ratio: 1; transform: translate(-50%, -50%); color: var(--mark); opacity: .06; pointer-events: none; z-index: 1; transition: opacity .6s ease; animation: none; text-shadow: none; font-size: inherit; }
+        .chat-watermark svg { width: 100%; height: 100%; display: block; fill: currentColor; }
+        .chat-watermark.lm-await { opacity: 0; transition: none; }
+        .chat-watermark.lm-landed { animation: lmBreathe 8s ease-in-out infinite; }
+        #active-chat.lm-thinking .chat-watermark { animation: lmWmThink 1.5s ease-in-out infinite; }
+        @keyframes lmBreathe { 0%, 100% { opacity: .05; scale: 1; } 50% { opacity: .085; scale: 1.035; } }
+        @keyframes lmWmThink { 0%, 100% { opacity: .06; scale: 1; } 50% { opacity: .16; scale: 1.05; } }
+
+        .lm-flyer { position: fixed; z-index: 9999; pointer-events: none; transform-origin: 0 0; will-change: transform, opacity; }
+        .lm-flyer > svg { width: 100%; height: 100%; display: block; fill: currentColor; position: relative; }
+        .lm-flyer .lm-disc { position: absolute; border-radius: 50%; background: #ffd84d; box-shadow: 0 0 50px 6px rgba(255,216,77,.5); }
+
+        .type-caret { display: inline-block; width: .5em; height: 1.05em; margin-left: 3px; vertical-align: -.18em; background: var(--accent); border-radius: 2px; animation: lmBlink 1s steps(2, start) infinite; }
+        @keyframes lmBlink { to { opacity: 0; } }
+        .message-row .ai-bubble.lm-live { opacity: 1; animation: none; }
+        .message-row .lm-error + .lm-error { margin-top: 8px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .chat-watermark.lm-landed, #active-chat.lm-thinking .chat-watermark, .type-caret { animation: none; }
+            .hero-logo .ai-spark.fantasy-expand { animation: none !important; }
+        }
     </style>
 </head>
 <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <!-- four logo options (switch in Settings) -->
+        <!-- four logo options (switch in Settings) -->
+        <symbol id="lm-logo-1" viewBox="0 0 64 64"><g fill="currentColor"><circle cx="32" cy="32" r="12"/>
+<g><path d="M32 2.500l4.600 15.500h-9.200z"/><path d="M32 61.500l4.600-15.500h-9.200z"/><path d="M2.500 32l15.500-4.600v9.200z"/><path d="M61.500 32l-15.500-4.600v9.200z"/></g>
+<g transform="rotate(45 32 32)" opacity=".62"><path d="M32 9l3.600 11h-7.200z"/><path d="M32 55l3.600-11h-7.200z"/><path d="M9 32l11-3.600v7.200z"/><path d="M55 32l-11-3.600v7.200z"/></g></g></symbol>
+        <symbol id="lm-logo-2" viewBox="0 0 64 64"><g fill="currentColor"><circle cx="32" cy="32" r="14"/></g><ellipse cx="32" cy="32" rx="29" ry="10" transform="rotate(-24 32 32)" fill="none" stroke="currentColor" stroke-width="3.600" opacity=".85"/><circle cx="55" cy="20" r="3.800" fill="currentColor"/></symbol>
+        <symbol id="lm-logo-3" viewBox="0 0 64 64"><g fill="currentColor"><circle cx="26" cy="42" r="16"/><rect x="38" y="6" width="6" height="36" rx="3"/><path d="M44 6c0 11 14 12 14 25 0 6-3 10-7 12 3-7 1-13-7-17z"/></g></symbol>
+        <symbol id="lm-logo-4" viewBox="0 0 64 64"><g fill="currentColor"><circle cx="32" cy="26" r="18"/><path d="M23 40h18v8a4 4 0 0 1-4 4H27a4 4 0 0 1-4-4z"/><rect x="25" y="55" width="14" height="4.500" rx="2.200"/></g></symbol>
+        <!-- icons -->
+        <symbol id="i-note" viewBox="0 0 24 24"><path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
+        <symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="4"/><path d="M10 9.500v5l4.500-2.500z"/></symbol>
+        <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+        <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></symbol>
+        <symbol id="i-cap" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.500 3 3 6 3s6-1.500 6-3v-5"/></symbol>
+        <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.500 10.900c.6.500 1 1.200 1 2.100h5c0-.9.4-1.600 1-2.100A6 6 0 0 0 12 3z"/></symbol>
+        <symbol id="i-quiz" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M9.500 9.500a2.500 2.500 0 1 1 3.800 2.100c-.9.500-1.300 1.100-1.300 2"/><path d="M12 17.200v.1"/></symbol>
+        <symbol id="i-books" viewBox="0 0 24 24"><path d="M4 4h4v16H4zM10 4h4v16h-4z"/><path d="M16.500 5.500l3.700-1 3 15-3.700 1z"/></symbol>
+        <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.500v3M12 18.500v3M2.500 12h3M18.500 12h3M5.300 5.300l2.100 2.100M16.600 16.600l2.100 2.100M18.700 5.300l-2.100 2.100M7.400 16.600l-2.100 2.100"/></symbol>
+        <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+        <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+        <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.500v2.500M12 19v2.500M2.500 12H5M19 12h2.500M5.300 5.300l1.800 1.800M16.900 16.900l1.800 1.800M18.700 5.300l-1.800 1.800M7.100 16.900l-1.800 1.800"/></symbol>
+        <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.500A8.500 8.500 0 0 1 9.500 4a8.500 8.500 0 1 0 10.500 10.500z"/></symbol>
+        <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.500A2.500 2.500 0 0 1 6.500 3h11A2.500 2.500 0 0 1 20 5.500v8a2.500 2.500 0 0 1-2.500 2.500H11l-4.500 4v-4h0A2.500 2.500 0 0 1 4 13.500z"/></symbol>
+        <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
+        <symbol id="i-list" viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h9"/></symbol>
+        <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></symbol>
+    </svg>
     <div class="sidebar" id="app-sidebar">
         <div class="sidebar-content">
             <a href="/" class="logo-link">
-                <div class="brand-logo"><span class="ai-spark">✦</span> Luminote</div>
+                <div class="brand-logo"><span class="brand-tile"><span class="ai-spark"><svg class="lm-mark" viewBox="0 0 64 64" aria-hidden="true"><use class="lm-use" href="#lm-logo-1"/></svg></span></span><span>Luminote</span></div>
             </a>
             <a href="/" style="text-decoration: none;">
-                <button class="new-chat-btn"><span>+</span> New Chat</button>
+                <button class="new-chat-btn"><span style="display:inline-flex"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></span> New chat</button>
             </a>
+            <div class="side-label">Recent chats</div>
             <div class="session-list">
                 {% for sid, data in sessions.items()|reverse %}
+                    {% set n_src = (data.documents or [])|length %}
                     <div class="session-item-container">
-                        <a href="/c/{{ sid }}" class="session-link {% if sid == current_session %}active{% endif %}">{{ data.title }}</a>
-                        
+                        <a href="/c/{{ sid }}" class="session-link {% if sid == current_session %}active{% endif %}"><span class="sl-ic"><svg class="ic" aria-hidden="true"><use href="#i-chat"/></svg></span><span class="sl-text"><span class="sl-title">{{ data.title }}</span><span class="sl-sub">{% if n_src == 0 %}No sources yet{% else %}{{ n_src }} source{{ '' if n_src == 1 else 's' }}{% endif %}</span></span></a>
+
                         <!-- DIRECT DELETE BUTTON -->
                         <form action="/delete/{{ sid }}" method="POST" style="margin: 0; position: absolute; right: 4px; height: 100%;">
-                            <button type="button" class="direct-action-btn" onclick="openDeleteModal(this.closest('form'))" title="Delete Chat">🗑</button>
+                            <button type="button" class="direct-action-btn" onclick="openDeleteModal(this.closest('form'))" title="Delete Chat" aria-label="Delete chat"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg></button>
                         </form>
                     </div>
                 {% endfor %}
             </div>
         </div>
         <div class="sidebar-footer">
-            <button class="settings-btn" onclick="openSettingsModal()"><span>⚙</span> Settings</button>
+            <button class="settings-btn" onclick="openSettingsModal()"><svg class="ic" aria-hidden="true"><use href="#i-gear"/></svg> Settings</button>
         </div>
     </div>
 
@@ -315,6 +833,15 @@
                     <option value="2">Exam Crunch (Revision)</option>
                     <option value="3">Standard Learner</option>
                 </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Logo</label>
+                <div class="logo-picker" id="logoPicker">
+                    <button type="button" class="logo-opt" data-n="1" title="Page of light" aria-label="Logo: page of light"><svg class="lm-mark" viewBox="0 0 64 64"><use href="#lm-logo-1"/></svg></button>
+                    <button type="button" class="logo-opt" data-n="2" title="Glow note" aria-label="Logo: glow note"><svg class="lm-mark" viewBox="0 0 64 64"><use href="#lm-logo-1"/></svg></button>
+                    <button type="button" class="logo-opt" data-n="3" title="L and a spark" aria-label="Logo: L and a spark"><svg class="lm-mark" viewBox="0 0 64 64"><use href="#lm-logo-3"/></svg></button>
+                    <button type="button" class="logo-opt" data-n="4" title="Open book" aria-label="Logo: open book"><svg class="lm-mark" viewBox="0 0 64 64"><use href="#lm-logo-4"/></svg></button>
+                </div>
             </div>
             <div class="form-group">
                 <label class="form-label">Custom Instructions (Optional)</label>
@@ -375,11 +902,12 @@
     <div class="main">
         <div class="top-bar">
             <!-- LEFT TOGGLE LOGO -->
-            <button class="brand-logo-toggle" onclick="toggleSidebar()"><span class="ai-spark" style="color: #fbbf24;">✦</span></button>
+            <button class="brand-logo-toggle" onclick="toggleSidebar()"><span class="ai-spark"><svg class="lm-mark" viewBox="0 0 64 64" aria-hidden="true"><use class="lm-use" href="#lm-logo-1"/></svg></span></button>
             
-            <button class="utility-btn" onclick="togglePDF()" id="pdfBtn" {% if latest_pdf %}style="display: flex;"{% else %}style="display: none;"{% endif %}>📄 View Notes</button>
-            <button class="utility-btn" onclick="triggerFlashcardStudio()">⚡ Study Deck</button>
-            <button class="utility-btn" onclick="toggleExamMode()" id="examBtn">🎓 Exam Simulator</button>
+            <button class="utility-btn" onclick="togglePDF()" id="pdfBtn" {% if latest_pdf %}style="display: flex;"{% else %}style="display: none;"{% endif %}><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg> View notes</button>
+            <button class="utility-btn" onclick="triggerFlashcardStudio()"><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg> Study deck</button>
+            <button class="utility-btn" onclick="toggleExamMode()" id="examBtn"><svg class="ic" aria-hidden="true"><use href="#i-cap"/></svg> Exam simulator</button>
+            <button type="button" class="theme-toggle" id="themeToggle" onclick="lmToggleTheme()" title="Switch light / dark" aria-label="Switch light or dark theme"><svg class="ic tg-sun" aria-hidden="true"><use href="#i-sun"/></svg><svg class="ic tg-moon" aria-hidden="true"><use href="#i-moon"/></svg></button>
         </div>
 
         <div class="workspace">
@@ -390,10 +918,10 @@
             <div class="chat-panel">
                 <div class="empty-state-wrapper" id="empty-state" {% if chat_log|length > 0 %}style="display: none;"{% endif %}>
                     
-                    <div class="hero-logo" id="main-hero-logo"><span class="ai-spark" id="main-spark-icon">✦</span></div>
+                    <div class="hero-logo" id="main-hero-logo"><span class="ai-spark" id="main-spark-icon"><svg class="lm-mark" viewBox="0 0 64 64" aria-hidden="true"><use class="lm-use" href="#lm-logo-1"/></svg></span></div>
                     
-                    <h1 class="hero-title">Welcome to Luminote</h1>
-                    <p class="hero-subtitle">Upload study notes, YouTube lectures, or ask questions to get started.</p>
+                    <h1 class="hero-title">What are we studying tonight?</h1>
+                    <p class="hero-subtitle">Add a PDF or a lecture link, then ask anything. Every answer shows the pages it came from.</p>
 
                     <div class="empty-input-box">
                         <div class="chat-form-wrapper" id="form-wrapper">
@@ -404,43 +932,55 @@
                                 <div class="attachment-pill-tray" id="tray-center"></div>
                                 <div class="input-card">
                                     <input type="file" name="pdf_file" id="pdf_file_center" accept=".pdf" onchange="handleFileSelected(this, 'tray-center')">
-                                    <label for="pdf_file_center" class="action-icon-btn">📄</label>
-                                    <button type="button" class="action-icon-btn" onclick="openYoutubeModal('chat-form-center', 'tray-center')">▶</button>
-                                    <button type="button" class="action-icon-btn" onclick="startSpeech('question_center')">🎙️</button>
+                                    <label for="pdf_file_center" class="action-icon-btn" title="Add a PDF" aria-label="Add a PDF"><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg></label>
+                                    <button type="button" class="action-icon-btn" onclick="openYoutubeModal('chat-form-center', 'tray-center')" title="Add a YouTube lecture" aria-label="Add a YouTube lecture"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></button>
+                                    <button type="button" class="action-icon-btn" onclick="startSpeech('question_center')" title="Dictate" aria-label="Dictate"><svg class="ic" aria-hidden="true"><use href="#i-mic"/></svg></button>
                                     
                                     <select name="target_source" class="custom-select">
                                         {% if latest_pdf %}<option value="{{ latest_pdf }}">{{ latest_pdf[:12] }}...</option><option value="ALL">All Notes</option>{% else %}<option value="ALL">All Notes</option>{% endif %}
                                         {% for doc in documents %}{% if doc != latest_pdf %}<option value="{{ doc }}">{{ doc[:12] }}...</option>{% endif %}{% endfor %}
                                     </select>
                                     
-                                    <textarea name="question" id="question_center" rows="1" placeholder="Ask Luminote anything..." onkeydown="handleEnter(event)"></textarea>
+                                    <textarea name="question" id="question_center" rows="1" placeholder="Ask about your notes…" onkeydown="handleEnter(event)"></textarea>
                                     <button type="submit" id="submit-btn-center">Send</button>
                                 </div>
                             </form>
+                            <div class="start-cards">
+                                {% if doc_count and doc_count > 0 %}
+                                <button type="button" class="start-card" onclick="lmCard('Make me a complete day-before revision pack from my notes: every topic, definitions, key points and common exam mistakes.')"><span class="sc-ic"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg></span><b>Make a revision pack</b><small>Every topic from your notes, page by page</small></button>
+                                <button type="button" class="start-card" onclick="lmCard('Quiz me on my notes. Ask one exam-style question at a time.')"><span class="sc-ic"><svg class="ic" aria-hidden="true"><use href="#i-quiz"/></svg></span><b>Quiz me</b><small>One exam-style question at a time</small></button>
+                                <button type="button" class="start-card" onclick="lmCard('Summarise my notes with the key points of each topic.')"><span class="sc-ic"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></span><b>Summarise my notes</b><small>Key points, with the pages they came from</small></button>
+                                {% else %}
+                                <label for="pdf_file_center" class="start-card"><span class="sc-ic"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg></span><b>Add a PDF</b><small>Notes, slides or a textbook chapter</small></label>
+                                <button type="button" class="start-card" onclick="openYoutubeModal('chat-form-center', 'tray-center')"><span class="sc-ic"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></span><b>Add a lecture</b><small>Paste a YouTube link</small></button>
+                                <button type="button" class="start-card" onclick="document.getElementById('question_center').focus()"><span class="sc-ic"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg></span><b>Just ask</b><small>Works without notes too</small></button>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                     
                     <div class="loading-container" id="loading-ui-center">
-                        <div class="spinner"></div><span>Analyzing Materials...</span>
+                        <div class="spinner"></div><span>Reading your notes…</span>
                     </div>
                 </div>
 
                 <div class="active-chat-wrapper" id="active-chat" {% if chat_log|length == 0 %}style="display: none;"{% endif %}>
+                    <div class="chat-watermark lm-landed" id="chat-watermark" aria-hidden="true"><svg viewBox="0 0 64 64"><use class="lm-use" href="#lm-logo-1"/></svg></div>
                     <div class="chat-display" id="chat-display">
                         {% for msg in chat_log %}
                             <div class="message-row">
                                 <div class="user-bubble">{{ msg.q }}</div>
                                 <textarea class="raw-markdown-data" style="display: none;">{{ msg.a | e }}</textarea>
-                                <div class="ai-bubble markdown-content"></div>
+                                <div class="ai-bubble markdown-content" data-sources='{{ (msg.s or [])|tojson }}'></div>
                                 <div class="response-actions">
-                                    <button class="action-chip" onclick="quickPrompt('Explain the above concept in simpler terms')">💡 Simpler</button>
-                                    <button class="action-chip" onclick="quickPrompt('Give me 3 testable exam questions based on this')">📝 Quiz Me</button>
-                                    <button class="action-chip" onclick="triggerFlashcardStudio()">⚡ Study Deck</button>
+                                    <button class="action-chip" onclick="quickPrompt('Explain the above concept in simpler terms')"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg> Simpler</button>
+                                    <button class="action-chip" onclick="quickPrompt('Give me 3 testable exam questions based on this')"><svg class="ic" aria-hidden="true"><use href="#i-quiz"/></svg> Quiz me</button>
+                                    <button class="action-chip" onclick="triggerFlashcardStudio()"><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg> Study deck</button>
                                 </div>
                             </div>
                         {% endfor %}
                         <div class="loading-container" id="loading-ui-bottom" style="position: relative; top: auto; left: auto; transform: none; display: none;">
-                            <div class="spinner"></div><span>Analyzing...</span>
+                            <div class="spinner"></div><span>Thinking…</span>
                         </div>
                     </div>
 
@@ -450,20 +990,20 @@
                             <input type="hidden" name="custom_instructions" class="hidden-instructions-input">
                             <input type="hidden" name="youtube_url" class="hidden-youtube-input">
                             <div class="attachment-pill-tray" id="tray-bottom">
-                                {% if doc_count > 0 %}<span class="attached-pill">📚 {{ doc_count }} Sources In Memory</span>{% endif %}
+                                {% if doc_count > 0 %}<span class="attached-pill"><svg class="ic" aria-hidden="true"><use href="#i-books"/></svg> {{ doc_count }} Sources In Memory</span>{% endif %}
                             </div>
                             <div class="input-card">
                                 <input type="file" name="pdf_file" id="pdf_file_bottom" accept=".pdf" onchange="handleFileSelected(this, 'tray-bottom')">
-                                <label for="pdf_file_bottom" class="action-icon-btn">📄</label>
-                                <button type="button" class="action-icon-btn" onclick="openYoutubeModal('chat-form-bottom', 'tray-bottom')">▶</button>
-                                <button type="button" class="action-icon-btn" onclick="startSpeech('question_bottom')">🎙️</button>
+                                <label for="pdf_file_bottom" class="action-icon-btn" title="Add a PDF" aria-label="Add a PDF"><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg></label>
+                                <button type="button" class="action-icon-btn" onclick="openYoutubeModal('chat-form-bottom', 'tray-bottom')" title="Add a YouTube lecture" aria-label="Add a YouTube lecture"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></button>
+                                <button type="button" class="action-icon-btn" onclick="startSpeech('question_bottom')" title="Dictate" aria-label="Dictate"><svg class="ic" aria-hidden="true"><use href="#i-mic"/></svg></button>
                                 
                                 <select name="target_source" class="custom-select">
                                     {% if latest_pdf %}<option value="{{ latest_pdf }}">{{ latest_pdf[:12] }}...</option><option value="ALL">All Notes</option>{% else %}<option value="ALL">All Notes</option>{% endif %}
                                     {% for doc in documents %}{% if doc != latest_pdf %}<option value="{{ doc }}">{{ doc[:12] }}...</option>{% endif %}{% endfor %}
                                 </select>
                                 
-                                <textarea name="question" id="question_bottom" rows="1" placeholder="Ask Luminote anything..." onkeydown="handleEnter(event)"></textarea>
+                                <textarea name="question" id="question_bottom" rows="1" placeholder="Ask about your notes…" onkeydown="handleEnter(event)"></textarea>
                                 <button type="submit" id="submit-btn-bottom">Send</button>
                             </div>
                         </form>
@@ -542,22 +1082,108 @@
 
         function parseMarkdown(text) {
             if (!text) return "";
+            text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
             let html = text.replace(/\\\$/g, "").replace(/\$/g, "").replace(/\\,/g, " ").replace(/\\\s/g, " ").replace(/\\mu/g, "µ").replace(/\\text\{([^}]+)\}/g, "$1").replace(/\\mathrm\{([^}]+)\}/g, "$1").replace(/\\/g, ""); 
-            html = html.replace(/([^\n])\s*(#{1,6}\s+)/g, "$1\n\n$2").replace(/([^\n])\s*([\*\-]\s+\*\*)/g, "$1\n\n$2").replace(/([^\n])\s*(\d+\.\s+\*\*)/g, "$1\n\n$2");
+            html = html.replace(/([^\n#])\s*(#{1,6}\s+)/g, "$1\n\n$2").replace(/([^\n \t])[ \t]+([\*\-]\s+\*\*)/g, "$1\n$2").replace(/([^\n \t])[ \t]+(\d+\.\s+\*\*)/g, "$1\n$2");
             return html
-                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #fbbf24; font-weight: 700;">$1</strong>')
-                .replace(/^####\s+(.*$)/gim, '<h4 style="color: #fbbf24; font-weight: 700; margin-top: 1.2em; margin-bottom: 0.6em;">$1</h4>')
-                .replace(/^###\s+(.*$)/gim, '<h3 style="color: #fbbf24; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.8em;">$1</h3>')
-                .replace(/^##\s+(.*$)/gim, '<h2 style="color: #fbbf24; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.8em; border-bottom: 1px solid rgba(251, 191, 36, 0.2); padding-bottom: 6px;">$1</h2>')
-                .replace(/^#\s+(.*$)/gim, '<h1 style="color: #ffffff; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.8em;">$1</h1>')
-                .replace(/^(\s*)[\*\-]\s+(.*$)/gim, function(match, spaces, content) {
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="md-strong">$1</strong>')
+                .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+                .replace(/(^|[^*\w])\*([^*\s][^*\n]*?)\*(?![*\w])/g, '$1<em>$2</em>')
+                .replace(/^####\s+(.*$)/gim, '<h4 class="md-h4">$1</h4>')
+                .replace(/^###\s+(.*$)/gim, '<h3 class="md-h3">$1</h3>')
+                .replace(/^##\s+(.*$)/gim, '<h2 class="md-h2">$1</h2>')
+                .replace(/^#\s+(.*$)/gim, '<h1 class="md-h1">$1</h1>')
+                .replace(/^([ \t]*)[\*\-]\s+(.*)(?:\n|$)/gim, function(match, spaces, content) {
                     let indent = spaces.length * 10;
-                    return `<div style="margin-left: ${16 + indent}px; margin-bottom: 8px; display: flex;"><span style="color: #fbbf24; font-weight: bold; margin-right: 8px;">•</span><div>${content}</div></div>`;
+                    return `<div class="md-li" style="margin-left: ${6 + indent}px"><span class="md-dot"></span><div>${content}</div></div>`;
                 })
-                .replace(/^\s*\-\-\-\s*$/gim, '<hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 24px 0;">')
-                .replace(/\n\n/g, '<div style="height: 12px;"></div>')
+                .replace(/^\s*\-\-\-\s*$/gim, '<hr class="md-hr">')
+                .replace(/\n\n/g, '<div class="md-gap"></div>')
                 .replace(/\n/g, '<br>');
         }
+
+        /* ---------- CITATIONS (sources behind each answer) ---------- */
+        function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+        function fmtClock(sec) { sec = Math.max(0, parseInt(sec || 0, 10)); return String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0'); }
+        function sourceLabel(s) {
+            if (s.page) return s.source + ' · p.' + s.page;
+            if (s.kind === 'youtube' && s.start != null) return s.source + ' · ' + fmtClock(s.start);
+            return s.source;
+        }
+        function chipAttrs(s) { return 'data-file="' + escHtml(s.source) + '" data-page="' + escHtml(s.page || '') + '" data-kind="' + escHtml(s.kind) + '"'; }
+        function refLine(used, single) {
+            const groups = {}, order = [], seen = {};
+            used.forEach(function(s) {
+                const k = s.source + '|' + (s.page || '') + '|' + (s.start == null ? '' : s.start);
+                if (seen[k]) return; seen[k] = 1;
+                if (!groups[s.source]) { groups[s.source] = []; order.push(s.source); }
+                groups[s.source].push(s);
+            });
+            const hasPage = used.some(function(s) { return !!s.page; });
+            let h = '<div class="ref-line"><span class="ref-label">' + (hasPage ? '<svg class="ic" aria-hidden="true"><use href="#i-note"/></svg> Referred pages' : '<svg class="ic" aria-hidden="true"><use href="#i-note"/></svg> Referred') + '</span>';
+            order.forEach(function(src) {
+                const list = groups[src].slice().sort(function(a, b) { return (a.page || 0) - (b.page || 0) || (a.start || 0) - (b.start || 0); });
+                if (!single) h += '<span class="ref-src">' + escHtml(src.length > 28 ? src.slice(0, 26) + '\u2026' : src) + '</span>';
+                list.forEach(function(s) {
+                    const lab = s.page ? 'p.' + s.page : (s.kind === 'youtube' && s.start != null ? '\u25b6 ' + fmtClock(s.start) : '\u2022');
+                    h += '<button type="button" class="ref-page" ' + chipAttrs(s) + ' title="' + escHtml(sourceLabel(s)) + '">' + escHtml(lab) + '</button>';
+                });
+            });
+            return h + '</div>';
+        }
+        function decorateCitations(html, sources) {
+            const byId = {}, names = {};
+            (sources || []).forEach(function(s) { byId[s.id] = s; names[s.source] = 1; });
+            const single = Object.keys(names).length <= 1;
+            const tagRe = /[ \t]*\[(S\d+(?:\s*[,;]\s*S?\d+)*)\]/g;
+            return String(html || '').split(/(?=<h[1-3][ >])/i).map(function(part) {
+                const used = [];
+                const cleaned = part.replace(tagRe, function(m, inner) {
+                    (inner.match(/\d+/g) || []).forEach(function(n) { const s = byId[n]; if (s && used.indexOf(s) === -1) used.push(s); });
+                    return '';
+                });
+                return used.length ? cleaned + refLine(used, single) : cleaned;
+            }).join('');
+        }
+        document.addEventListener('click', function(e) {
+            const chip = e.target.closest ? e.target.closest('.cite-chip, .source-chip, .ref-page') : null;
+            if (!chip) return;
+            const file = chip.dataset.file; const page = chip.dataset.page;
+            if (!file || !/\.pdf$/i.test(file)) return;
+            const panel = document.getElementById('pdf-panel'); const frame = document.getElementById('pdf-frame'); const btn = document.getElementById('pdfBtn');
+            if (!panel || !frame) return;
+            panel.style.display = 'block';
+            if (btn) { btn.style.display = 'flex'; btn.classList.add('active'); }
+            const url = '/uploads/' + encodeURIComponent(file) + (page ? '#page=' + encodeURIComponent(page) : '');
+            frame.src = 'about:blank';
+            setTimeout(function() { frame.src = url; }, 40);
+        });
+
+        /* ---------- theme (light / dark) ---------- */
+        function lmApplyTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+            const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t === 'light' ? '#f4f5f9' : '#09090b');
+        }
+        function lmToggleTheme() {
+            const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            try { localStorage.setItem('luminote_theme', next); } catch (e) {}
+            lmApplyTheme(next);
+        }
+        (function() { lmApplyTheme(document.documentElement.getAttribute('data-theme') || 'dark'); })();
+        function lmCard(text) {
+            const ta = document.getElementById('question_center'); if (!ta) return;
+            ta.value = text; handleAjaxSubmit(new Event('submit'), 'chat-form-center');
+        }
+
+        /* ---------- logo choice (Settings > Logo) ---------- */
+        function lmApplyLogo(n) {
+            n = parseInt(n, 10); if (!(n >= 1 && n <= 4)) n = 1;
+            document.querySelectorAll('use.lm-use').forEach(function(u) { u.setAttribute('href', '#lm-logo-' + n); });
+            document.querySelectorAll('.logo-opt').forEach(function(b) { b.classList.toggle('is-on', parseInt(b.dataset.n, 10) === n); });
+        }
+        function lmSetLogo(n) { try { localStorage.setItem('luminote_logo', String(n)); } catch (e) {} lmApplyLogo(n); }
+        document.addEventListener('click', function(e) { const b = e.target.closest ? e.target.closest('.logo-opt') : null; if (b) lmSetLogo(b.dataset.n); });
+        (function() { let n = 1; try { n = localStorage.getItem('luminote_logo') || 1; } catch (e) {} lmApplyLogo(n); })();
 
         function toggleSidebar() {
             const isOpen = document.documentElement.classList.contains('sidebar-open');
@@ -633,7 +1259,7 @@
                 const formId = input.closest('form').id; const tray = document.getElementById(trayId);
                 const existing = document.getElementById(`${formId}-file-pill`); if (existing) existing.remove();
                 const pill = document.createElement('span'); pill.className = 'attached-pill'; pill.id = `${formId}-file-pill`;
-                pill.innerHTML = `📄 ${input.files[0].name} <button type="button" class="pill-remove-btn" onclick="removeFileAttachment('${formId}')">×</button>`;
+                pill.innerHTML = `<svg class="ic" aria-hidden="true"><use href="#i-note"/></svg> ${input.files[0].name} <button type="button" class="pill-remove-btn" onclick="removeFileAttachment('${formId}')">×</button>`;
                 tray.appendChild(pill);
             }
         }
@@ -689,6 +1315,9 @@
             const textarea = formElement.querySelector('textarea'); const qText = textarea.value.trim();
             const fileInput = formElement.querySelector('input[type="file"]'); const ytInput = formElement.querySelector('.hidden-youtube-input');
             if (!qText && !(fileInput.files && fileInput.files.length > 0) && !(ytInput && ytInput.value.trim() !== '')) return;
+            if (window.__lmBusy && Date.now() - window.__lmBusy < 90000) return;
+            window.__lmBusy = Date.now();
+            { const ac = document.getElementById('active-chat'); if (ac && !isCenter) ac.classList.add('lm-thinking'); }
 
             textarea.value = ''; textarea.style.height = 'auto';
             formElement.querySelector('.hidden-persona-input').value = localStorage.getItem('luminote_persona') || '3';
@@ -715,14 +1344,45 @@
             }
         }
 
-        async function doFetch(formElement, isCenter, sentQuestion) {
-            const formData = new FormData(formElement);
-            if (!formData.get('question')) formData.set('question', sentQuestion);
+        function lmShowFailure(data, isCenter, question, formElement) {
+            const msg = (data && (data.message || data.error || data.a)) || 'The AI is busy right now. Please try again in a moment.';
+            const display = document.getElementById('chat-display');
+            const lc = document.getElementById('loading-ui-center'); if (lc) lc.style.display = 'none';
+            const lb = document.getElementById('loading-ui-bottom'); if (lb) lb.style.display = 'none';
+            const sb = document.getElementById('submit-btn-bottom'); if (sb) sb.style.display = 'inline-block';
+            let row;
+            if (isCenter) {
+                document.getElementById('empty-state').style.display = 'none';
+                document.getElementById('active-chat').style.display = 'flex';
+                row = document.createElement('div'); row.className = 'message-row';
+                row.innerHTML = `<div class="user-bubble">${escHtml(question)}</div>`;
+                display.insertBefore(row, lb);
+            } else {
+                const rows = display.querySelectorAll('.message-row'); row = rows[rows.length - 1];
+                if (!row) { row = document.createElement('div'); row.className = 'message-row'; display.insertBefore(row, lb); }
+            }
+            const err = document.createElement('div'); err.className = 'ai-bubble lm-error'; err.setAttribute('role', 'alert');
+            err.innerHTML = `<span class="lm-error-text">${escHtml(msg)}</span><button type="button" class="lm-retry-btn">\u21bb Retry</button>`;
+            err.querySelector('.lm-retry-btn').addEventListener('click', () => { row.remove(); quickPrompt(question); });
+            row.appendChild(err);
+            if (data && data.doc_count > 0) document.getElementById('tray-bottom').innerHTML = `<span class="attached-pill"><svg class="ic" aria-hidden="true"><use href="#i-books"/></svg> ${data.doc_count} Sources In Memory</span>`;
+            if (data && data.latest_pdf) { const btn = document.getElementById('pdfBtn'); const frame = document.getElementById('pdf-frame'); if (btn) btn.style.display = 'flex'; if (frame) frame.src = '/uploads/' + encodeURIComponent(data.latest_pdf); }
+            setTimeout(() => { display.scrollTop = display.scrollHeight; }, 50);
+            removeFileAttachment(formElement.id); removeYoutubeAttachment(formElement.id);
+        }
+
+        async function doFetchLegacy(formElement, isCenter, sentQuestion, preloaded) {
             try {
-                const response = await fetch(window.location.href, { method: 'POST', body: formData, headers: { 'X-Fetch-API': 'true' } });
-                const data = await response.json();
-                const answerHtml = parseMarkdown(data.a);
-                const chipsHtml = `<div class="response-actions"><button class="action-chip" onclick="quickPrompt('Explain the above concept in simpler terms')">💡 Simpler</button><button class="action-chip" onclick="quickPrompt('Give me 3 testable exam questions based on this')">📝 Quiz Me</button><button class="action-chip" onclick="triggerFlashcardStudio()">⚡ Study Deck</button></div>`;
+                let data = preloaded;
+                if (!data) {
+                    const formData = new FormData(formElement);
+                    if (!formData.get('question')) formData.set('question', sentQuestion);
+                    const response = await fetch(window.location.href, { method: 'POST', body: formData, headers: { 'X-Fetch-API': 'true' } });
+                    data = await response.json();
+                }
+                if (data && data.success === false) { lmShowFailure(data, isCenter, sentQuestion, formElement); return; }
+                const answerHtml = decorateCitations(parseMarkdown(data.a), data.sources || []);
+                const chipsHtml = `<div class="response-actions"><button class="action-chip" onclick="quickPrompt('Explain the above concept in simpler terms')"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg> Simpler</button><button class="action-chip" onclick="quickPrompt('Give me 3 testable exam questions based on this')"><svg class="ic" aria-hidden="true"><use href="#i-quiz"/></svg> Quiz me</button><button class="action-chip" onclick="triggerFlashcardStudio()"><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg> Study deck</button></div>`;
 
                 if (isCenter) {
                     document.getElementById('empty-state').style.display = 'none'; document.getElementById('active-chat').style.display = 'flex';
@@ -730,9 +1390,9 @@
                     const msgRow = document.createElement('div'); msgRow.className = 'message-row latest-message';
                     msgRow.innerHTML = `<div class="user-bubble">${data.q.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div><div class="ai-bubble markdown-content">${answerHtml}</div>${chipsHtml}`;
                     display.insertBefore(msgRow, document.getElementById('loading-ui-bottom')); document.getElementById('loading-ui-center').style.display = 'none';
-                    if (data.doc_count > 0) document.getElementById('tray-bottom').innerHTML = `<span class="attached-pill">📚 ${data.doc_count} Sources In Memory</span>`;
+                    if (data.doc_count > 0) document.getElementById('tray-bottom').innerHTML = `<span class="attached-pill"><svg class="ic" aria-hidden="true"><use href="#i-books"/></svg> ${data.doc_count} Sources In Memory</span>`;
                     if (data.latest_pdf) { const btn = document.getElementById('pdfBtn'); const frame = document.getElementById('pdf-frame'); if (btn) btn.style.display = 'flex'; if (frame) frame.src = '/uploads/' + encodeURIComponent(data.latest_pdf); }
-                    const activeLink = document.querySelector('.session-link.active'); if (activeLink && data.title) activeLink.innerText = data.title;
+                    const activeLink = document.querySelector('.session-link.active'); if (activeLink && data.title) { const tt = activeLink.querySelector('.sl-title'); if (tt) tt.textContent = data.title; else activeLink.innerText = data.title; const ss = activeLink.querySelector('.sl-sub'); if (ss && typeof data.doc_count === 'number') ss.textContent = data.doc_count === 0 ? 'No sources yet' : data.doc_count + (data.doc_count === 1 ? ' source' : ' sources'); }
                     setTimeout(() => { display.scrollTop = display.scrollHeight; }, 50);
                 } else {
                     document.getElementById('loading-ui-bottom').style.display = 'none'; document.getElementById('submit-btn-bottom').style.display = 'inline-block';
@@ -741,7 +1401,7 @@
                         const aiDiv = document.createElement('div'); aiDiv.className = 'ai-bubble markdown-content'; aiDiv.innerHTML = answerHtml; lastRow.appendChild(aiDiv);
                         const actionsDiv = document.createElement('div'); actionsDiv.innerHTML = chipsHtml; lastRow.appendChild(actionsDiv.firstElementChild); lastRow.classList.add('latest-message'); 
                     }
-                    if (data.doc_count > 0) document.getElementById('tray-bottom').innerHTML = `<span class="attached-pill">📚 ${data.doc_count} Sources In Memory</span>`;
+                    if (data.doc_count > 0) document.getElementById('tray-bottom').innerHTML = `<span class="attached-pill"><svg class="ic" aria-hidden="true"><use href="#i-books"/></svg> ${data.doc_count} Sources In Memory</span>`;
                     if (data.latest_pdf) { const btn = document.getElementById('pdfBtn'); const frame = document.getElementById('pdf-frame'); if (btn) btn.style.display = 'flex'; if (frame) frame.src = '/uploads/' + encodeURIComponent(data.latest_pdf); }
                     setTimeout(() => { display.scrollTop = display.scrollHeight; }, 50);
                 }
@@ -754,8 +1414,190 @@
             }
         }
 
+
+        /* ================= v4: streaming answer + logo motion ================= */
+        const lmSleep = ms => new Promise(r => setTimeout(r, ms));
+        const lmReduced = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        async function lmReadNdjson(resp, onEvent) {
+            if (!resp.body || !resp.body.getReader) {
+                const txt = await resp.text();
+                for (const line of txt.split('\n')) { if (line.trim()) await onEvent(JSON.parse(line)); }
+                return;
+            }
+            const reader = resp.body.getReader(); const dec = new TextDecoder(); let buf = '';
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                buf += dec.decode(value, { stream: true });
+                let i;
+                while ((i = buf.indexOf('\n')) >= 0) {
+                    const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+                    if (line) { let ev = null; try { ev = JSON.parse(line); } catch (e) {} if (ev) await onEvent(ev); }
+                }
+            }
+            const rest = (buf + dec.decode()).trim();
+            if (rest) { let ev = null; try { ev = JSON.parse(rest); } catch (e) {} if (ev) await onEvent(ev); }
+        }
+
+        function lmTypewriter(el, getSources, display) {
+            let full = '', shown = 0, raf = 0, last = 0, lastRender = 0, safety = 0, fin = false, resolve;
+            const res = new Promise(r => { resolve = r; });
+            const instant = () => lmReduced() || document.hidden;
+            function html(t, final) {
+                if (!final) { t = t.replace(/\[[^\]]*$/, ''); if (((t.match(/\*\*/g) || []).length) % 2) t += '**'; }
+                return decorateCitations(parseMarkdown(t), getSources());
+            }
+            function put(h, caret) {
+                const near = display.scrollHeight - display.scrollTop - display.clientHeight < 90;
+                el.innerHTML = h;
+                if (caret) {
+                    let n = el; const blocks = /^(DIV|P|LI|UL|OL|H[1-6])$/;
+                    while (n.lastElementChild && blocks.test(n.lastElementChild.tagName)) n = n.lastElementChild;
+                    const c = document.createElement('span'); c.className = 'type-caret'; n.appendChild(c);
+                }
+                if (near) display.scrollTop = display.scrollHeight;
+            }
+            function finishNow() { if (raf) { cancelAnimationFrame(raf); raf = 0; } clearTimeout(safety); shown = full.length; put(html(full, true), false); resolve(); }
+            function tick(now) {
+                raf = 0;
+                const dt = Math.min(100, now - last); last = now;
+                const backlog = full.length - shown;
+                if (backlog > 0) {
+                    const step = Math.max(2, Math.ceil(Math.min(30, Math.max(2, backlog / 22)) * dt / 16.7));
+                    shown = Math.min(full.length, shown + step);
+                    const c = full.charCodeAt(shown - 1); if (c >= 0xD800 && c <= 0xDBFF && shown < full.length) shown++;
+                    if (now - lastRender >= 33 || shown >= full.length) { put(html(full.slice(0, shown), false), true); lastRender = now; }
+                }
+                if (shown < full.length) raf = requestAnimationFrame(tick);
+                else if (fin) finishNow();
+            }
+            return {
+                push(t) {
+                    full += t;
+                    if (instant()) { shown = full.length; put(html(full, false), true); return; }
+                    if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
+                },
+                finish() {
+                    fin = true;
+                    if (shown >= full.length || instant()) finishNow();
+                    else safety = setTimeout(finishNow, Math.min(9000, 600 + (full.length - shown) * 8));
+                    return res;
+                },
+                text() { return full; }
+            };
+        }
+
+        function lmFlyLogo() {
+            const chat = document.getElementById('active-chat'), empty = document.getElementById('empty-state'), wm = document.getElementById('chat-watermark');
+            const src = document.querySelector('#main-hero-logo .lm-mark') || document.querySelector('.hero-logo .lm-mark');
+            const showChat = () => { empty.style.display = 'none'; chat.style.display = 'flex'; };
+            if (!src || !wm || !src.animate || lmReduced()) { showChat(); if (wm) wm.classList.add('lm-landed'); return; }
+            const spark = src.closest('.ai-spark');
+            const r0 = src.getBoundingClientRect(); const col = getComputedStyle(spark || src).color;
+            const fly = document.createElement('div'); fly.className = 'lm-flyer';
+            fly.style.cssText = `left:${r0.left}px;top:${r0.top}px;width:${r0.width}px;height:${r0.height}px;color:${col}`;
+            if (document.documentElement.getAttribute('data-theme') === 'light' && spark) {
+                const k = r0.width / (spark.offsetWidth || r0.width); const disc = document.createElement('div'); disc.className = 'lm-disc';
+                disc.style.inset = (-30 * k) + 'px'; fly.appendChild(disc);
+                disc.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 650, easing: 'ease-out', fill: 'forwards' });
+            }
+            fly.appendChild(src.cloneNode(true)); document.body.appendChild(fly);
+            wm.classList.remove('lm-landed'); wm.classList.add('lm-await'); showChat();
+            const r1 = wm.getBoundingClientRect();
+            const sx = r1.width / r0.width, dx = r1.left - r0.left, dy = r1.top - r0.top;
+            const anim = fly.animate([
+                { transform: 'translate(0,0) scale(1)', opacity: 1, filter: 'drop-shadow(0 0 24px rgba(251,191,36,.9))' },
+                { transform: `translate(${dx}px,${dy}px) scale(${sx})`, opacity: .06, filter: 'drop-shadow(0 0 0 rgba(251,191,36,0))' }
+            ], { duration: 1100, easing: 'cubic-bezier(.65,0,.25,1)', fill: 'forwards' });
+            let ended = false;
+            const end = () => {
+                if (ended) return; ended = true; fly.remove();
+                wm.style.transition = 'none'; wm.classList.remove('lm-await'); wm.classList.add('lm-landed'); void wm.offsetWidth; wm.style.transition = '';
+            };
+            anim.onfinish = end; anim.oncancel = end; setTimeout(end, 1600);
+        }
+
+        function lmApplyMeta(d, isCenter, formElement) {
+            if (d.doc_count > 0) document.getElementById('tray-bottom').innerHTML = `<span class="attached-pill"><svg class="ic" aria-hidden="true"><use href="#i-books"/></svg> ${d.doc_count} Sources In Memory</span>`;
+            if (d.latest_pdf) { const btn = document.getElementById('pdfBtn'); const frame = document.getElementById('pdf-frame'); if (btn) btn.style.display = 'flex'; if (frame) frame.src = '/uploads/' + encodeURIComponent(d.latest_pdf); }
+            if (isCenter) {
+                const activeLink = document.querySelector('.session-link.active');
+                if (activeLink && d.title) { const tt = activeLink.querySelector('.sl-title'); if (tt) tt.textContent = d.title; else activeLink.innerText = d.title; const ss = activeLink.querySelector('.sl-sub'); if (ss && typeof d.doc_count === 'number') ss.textContent = d.doc_count === 0 ? 'No sources yet' : d.doc_count + (d.doc_count === 1 ? ' source' : ' sources'); }
+            }
+            removeFileAttachment(formElement.id); removeYoutubeAttachment(formElement.id);
+        }
+
+        const LM_CHIPS = `<div class="response-actions"><button class="action-chip" onclick="quickPrompt('Explain the above concept in simpler terms')"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg> Simpler</button><button class="action-chip" onclick="quickPrompt('Give me 3 testable exam questions based on this')"><svg class="ic" aria-hidden="true"><use href="#i-quiz"/></svg> Quiz me</button><button class="action-chip" onclick="triggerFlashcardStudio()"><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg> Study deck</button></div>`;
+
+        async function lmRunStream(formElement, isCenter, q) {
+            const fd = new FormData(formElement); if (!fd.get('question')) fd.set('question', q);
+            const resp = await fetch(window.location.href, { method: 'POST', body: fd, headers: { 'X-Fetch-API': 'true', 'X-Stream': 'true' } });
+            if (!((resp.headers.get('content-type') || '').includes('ndjson'))) { const data = await resp.json(); return doFetchLegacy(formElement, isCenter, q, data); }
+            const display = document.getElementById('chat-display'), chat = document.getElementById('active-chat');
+            const lb = document.getElementById('loading-ui-bottom'), sb = document.getElementById('submit-btn-bottom');
+            let sources = [], row = null, bubble = null, tw = null, started = false, finished = false;
+            display.style.scrollBehavior = 'auto';
+
+            const start = () => {
+                started = true; chat.classList.remove('lm-thinking');
+                if (isCenter) {
+                    lmFlyLogo();
+                    row = document.createElement('div'); row.className = 'message-row';
+                    row.innerHTML = `<div class="user-bubble">${escHtml(q)}</div>`; display.insertBefore(row, lb);
+                    document.getElementById('loading-ui-center').style.display = 'none';
+                } else {
+                    const rows = display.querySelectorAll('.message-row'); row = rows[rows.length - 1];
+                    if (!row) { row = document.createElement('div'); row.className = 'message-row'; display.insertBefore(row, lb); }
+                    lb.style.display = 'none';
+                }
+                bubble = document.createElement('div'); bubble.className = 'ai-bubble markdown-content lm-live'; row.appendChild(bubble);
+                tw = lmTypewriter(bubble, () => sources, display);
+            };
+            const fail = async (msg, partial) => {
+                finished = true;
+                if (!started) { lmShowFailure({ a: msg }, isCenter, q, formElement); return; }
+                await tw.finish();
+                const err = document.createElement('div'); err.className = 'ai-bubble lm-error'; err.setAttribute('role', 'alert');
+                err.innerHTML = `<span class="lm-error-text">${escHtml(msg)}</span><button type="button" class="lm-retry-btn">↻ Retry</button>`;
+                err.querySelector('.lm-retry-btn').addEventListener('click', () => { row.remove(); quickPrompt(q); });
+                row.appendChild(err); sb.style.display = 'inline-block'; removeFileAttachment(formElement.id); removeYoutubeAttachment(formElement.id);
+            };
+
+            try {
+                await lmReadNdjson(resp, async ev => {
+                    if (ev.t === 'sources') { sources = ev.v || []; }
+                    else if (ev.t === 'delta') { if (!started) start(); tw.push(ev.v || ''); }
+                    else if (ev.t === 'done') {
+                        finished = true;
+                        if (!started) { start(); tw.push(ev.a || ''); }
+                        await tw.finish();
+                        bubble.innerHTML = decorateCitations(parseMarkdown(ev.a), ev.sources || []);
+                        const holder = document.createElement('div'); holder.innerHTML = LM_CHIPS; row.appendChild(holder.firstElementChild);
+                        row.classList.add('latest-message'); sb.style.display = 'inline-block';
+                        lmApplyMeta(ev, isCenter, formElement);
+                        display.scrollTop = display.scrollHeight;
+                    }
+                    else if (ev.t === 'error') { await fail(ev.v || 'Something went wrong. Please try again.', ev.partial); }
+                });
+            } catch (err) {
+                console.error('Stream error', err);
+                if (!finished) { if (started) await fail('⚠️ The connection dropped. Please try again.', true); else throw err; }
+            }
+            if (!finished) { if (started) await fail('⚠️ The answer was cut off. Please try again.', true); else throw new Error('empty stream'); }
+        }
+
+        async function doFetch(formElement, isCenter, sentQuestion) {
+            try { await lmRunStream(formElement, isCenter, sentQuestion); }
+            catch (err) {
+                console.error('Crash Detected:', err);
+                lmShowFailure({ message: 'Couldn’t reach Luminote. Check your connection and try again.' }, isCenter, sentQuestion, formElement);
+            }
+            finally { window.__lmBusy = 0; const ac = document.getElementById('active-chat'); if (ac) ac.classList.remove('lm-thinking'); }
+        }
+
         window.onload = function() {
-            document.querySelectorAll('.message-row').forEach(row => { const rawData = row.querySelector('.raw-markdown-data'); const contentBox = row.querySelector('.markdown-content'); if (rawData && contentBox) contentBox.innerHTML = parseMarkdown(rawData.value); });
+            document.querySelectorAll('.message-row').forEach(row => { const rawData = row.querySelector('.raw-markdown-data'); const contentBox = row.querySelector('.markdown-content'); if (rawData && contentBox) { let src = []; try { src = JSON.parse(contentBox.dataset.sources || '[]'); } catch (e) {} contentBox.innerHTML = decorateCitations(parseMarkdown(rawData.value), src); } });
             const chatDisplay = document.getElementById('chat-display'); if (chatDisplay) { setTimeout(() => { chatDisplay.scrollTop = chatDisplay.scrollHeight; }, 50); }
             document.querySelectorAll('textarea').forEach(el => { el.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; }); });
         };

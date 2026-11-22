@@ -9,3 +9,10 @@ env/
 uploads/
 sessions/
 .DS_Store
+
+# Secrets and local data (never commit)
+.env
+.env.*
+!.env.example
+chat_history.json
+chroma_db/
